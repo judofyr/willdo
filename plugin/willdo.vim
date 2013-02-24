@@ -103,6 +103,7 @@ function willdo#ExecuteView() abort
   let win = winsaveview()
 
   exe viewnr . 'wincmd w'
+  write
   silent exe "%!".shellescape(g:willdo_ruby).' '.shellescape(g:willdo_runner).' '.shellescape(bufname('%'))
   write
 
