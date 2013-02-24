@@ -81,9 +81,14 @@ class ItemList
 end
 
 class FilterContext
-  def initialize(list, item)
+  def initialize(list, item, query)
     @list = list
     @item = item
+    @query = query
+  end
+
+  def valid?
+    instance_eval(@query)
   end
 
   def today
@@ -99,7 +104,9 @@ class FilterContext
   end
 
   def blocked
-    !@list.blocked[@item.id].empty?
+    @list.blocked[@item.id].any? do |item|
+      FilterContext.new(@list, item, @query).valid?
+    end
   end
 
   def with_parents(item)
@@ -182,7 +189,7 @@ states = {
     if line.strip.empty?
       res = []
       items.each do |item|
-        if FilterContext.new(items, item).instance_eval(cmd)
+        if FilterContext.new(items, item, cmd).valid?
           $seen << item
           res << item
         end
