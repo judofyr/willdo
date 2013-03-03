@@ -2,24 +2,39 @@
 require 'set'
 require 'date'
 
-class FuzzyDate
-  def initialize(date)
-    @date = date
+class Date
+  class Earlier
+    def initialize(date)
+      @date = date
+    end
+
+    def ===(other)
+      other <= @date
+    end
   end
 
-  def exact
-    @date
+  class Later
+    def initialize(date)
+      @date = date
+    end
+
+    def ===(other)
+      other >= @date
+    end
   end
 
-  def ===(other)
-    y, m, d = other.split('-').map(&:to_i)
-    Date.new(y, m, d) <= @date
+  def and_earlier
+    Earlier.new(self)
+  end
+
+  def and_later
+    Later.new(self)
   end
 end
 
 class Integer
   def days
-    FuzzyDate.new(Date.today + self)
+    Date.today + self
   end
 
   alias day days
@@ -136,10 +151,9 @@ class FilterContext
     case expr
     when String
       obj =~ /\b#{Regexp.escape(expr)}\b/
-    when Date
-      obj == expr.to_s
-    when FuzzyDate
-      expr === obj
+    when Date, Date::Earlier, Date::Later
+      str = obj.to_s
+      !str.empty? && expr === Date.parse(str)
     when nil
       true
     else
