@@ -186,7 +186,7 @@ $seen = Set.new
 cmd = queue = nil
 state = :before
 states = {
-  before: proc do |line|
+  :before => proc do |line|
     next if line.empty?
     case line
     when />(.*)$/
@@ -199,7 +199,7 @@ states = {
     end
   end,
 
-  gather: proc do |line|
+  :gather => proc do |line|
     if line.strip.empty?
       res = []
       items.each do |item|
